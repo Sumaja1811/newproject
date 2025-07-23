@@ -1,3 +1,6 @@
+//npm install framer-motion
+//npx shadcn@latest add carousel
+//npx shadcn@latest add tabs
 "use client";
 import { CustomCard } from "@/components/ProductCard";
 import { useState } from "react";
@@ -20,6 +23,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {Tabs,TabsList, TabsTrigger} from "@/components/ui/tabs";
+import { ModeToggle } from "./mode-toggle";
 
  const products = [
     {
@@ -118,23 +122,36 @@ const LandingPage = () => {
   return (
   <div className="min-h-screen relative overflow-x-hidden">
     {/* Background */}
-    <div className="absolute inset-0 w-full h-full z-0">
-      <img src="/bg.jpeg" alt="Background" className="w-full h-full object-cover object-center" />
-      <div className="absolute inset-0 bg-black/70" />
-    </div>
+   <div className="absolute inset-0 w-full h-full z-0">
+  {/* Light mode background */}
+  <div className="w-full h-full bg-[#F7F7F7] dark:hidden" />
+
+  {/* Dark mode background image */}
+  <div className="hidden dark:block relative w-full h-full">
+    <img
+      src="/bg.jpeg"
+      alt="Background"
+      className="w-full h-full object-cover object-center"
+    />
+    <div className="absolute inset-0 bg-black/70" />
+  </div>
+</div>
+
 
     <div className="relative z-10 container mx-auto px-4 py-4">
       {/* Title */}
+      <div className="flex justify-end px-4 py-2"><ModeToggle /></div>
       <div className="text-center mb-5">
-        <h1 className="text-4xl font-semibold text-white mb-3 tracking-tight">Welcome to TCS ASCEND</h1>
-        <p className="text-[14px] font-medium text-gray-300 max-w-4xl mx-auto py-2">
+        <h1 className="text-4xl font-semibold text-black dark:text-white mb-3 tracking-tight">Welcome to TCS ASCEND</h1>
+
+        <p className="text-[14px] font-medium text-[#333333] dark:text-white max-w-4xl mx-auto py-2">
           GenAI Powered AI Suite for Cognitive Engineering, Navigation and Delivery.
         </p>
       </div>
         {/* Tabs for Product Phases */}
         <Tabs value={selectedPhase ?? ""}onValueChange={handlePhaseToggle}>
-        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 bg-transparent p-2 rounded-xl mb-6 ">
-          {phase.map((phase)=>(<TabsTrigger key={phase} value={phase} className="text-sm text-white data-[state=active]:text-white hover:underline "
+        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 bg-transparent p-2 rounded-xl mb-6 h-9">
+          {phase.map((phase)=>(<TabsTrigger key={phase} value={phase} className="text-sm text-black dark:text-white data-[state=active]:!text-purple-500 hover:underline "
               >
                 #{phase}
               </TabsTrigger>
