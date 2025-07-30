@@ -229,7 +229,7 @@ import axios from 'axios';
 import Sitevalidator from './sitevalidator';
 import { Input } from '@/components/ui/input';
 
-import { ArrowDownAZ, ArrowUpAZ, Car, ChevronDown, Scroll } from 'lucide-react';
+import { ArrowDownAZ, ArrowUpAZ, Car, ChevronDown, Mic, Scroll } from 'lucide-react';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { ScrollBar } from '@/components/ui/scroll-area';
 import './speaktext.css'
@@ -445,21 +445,39 @@ if (!finalInput) return;
   const dynamicHeight = isSidebarCollapsed ? 'h-[253px]' : 'h-[238px]';
   const dynamicHeightJira = isSidebarCollapsed ? 'h-[373px]' : 'h-[359px]';
   const dynamicActivityLogHeight = isSidebarCollapsed ? 'h-[327px]' : 'h-[312px] ';
+  const dynamicTabsWidth = isSidebarCollapsed ? 'w-[93vw]' : 'w-[77.7vw]'
 
   return (
     <div className="flex w-full flex-col">
       <Tabs defaultValue="Speaktest">
-        <TabsList className="h-[7vh] w-[30vw] bg-[#ececec] dark:bg-[#2E2D2D] rounded-xl">
-          <TabsTrigger value="Speaktest" className="flex items-center">
-            <span style={{ marginLeft: '8px' }}>Speak Test</span>
+        <TabsList
+          className={`flex flex-row gap-2 items-center px-2 py-1 h-auto bg-[#ececec] dark:bg-[#2E2D2D] rounded-xl overflow-x-auto`}
+        >
+          <TabsTrigger
+            value="Speaktest"
+            className="flex items-center justify-center px-4 py-2 rounded-full whitespace-nowrap text-white w-full"
+          >
+            <Mic className="w-4 h-4" />
+            <span className="ml-2">Speak Test</span>
           </TabsTrigger>
-          <TabsTrigger value="SiteValidator" className="flex items-center">
-            <span style={{ marginLeft: '10px' }}>Site Validator</span>
+
+          <TabsTrigger
+            value="SiteValidator"
+            className="flex items-center justify-center px-4 py-2 rounded-full whitespace-nowrap bg-[#2e2e2e] text-white w-full"
+          >
+            <img src="/siteval.svg" className="w-4 h-4" />
+            <span className="ml-2">Site Validator</span>
           </TabsTrigger>
-          <TabsTrigger value="JiraTasks" className="flex items-center">
-            <span style={{ marginLeft: '10px' }}>Jira Tasks</span>
+
+          <TabsTrigger
+            value="JiraTasks"
+            className="flex items-center justify-center  px-4 py-2 rounded-full whitespace-nowrap bg-[#2e2e2e] text-white w-full"
+          >
+            <img src="/jira_icon.svg" className='w-4 h-4' />
+            <span className="ml-2">Jira Tasks</span>
           </TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="Speaktest">
           <Card className={`bg-[#ececec] dark:bg-[#181818] border border-[#ccc] dark:border-[#444] ${dynamicwidth} mt-2 transition-all duration-300 h-[11rem]`}>
@@ -535,9 +553,9 @@ if (!finalInput) return;
         </TabsContent>
 
       <TabsContent value="JiraTasks">
-          <div className="flex flex-row gap-5 mb-4">
+          <div className="flex flex-row gap-5 mb-4 mt-2 rounded-xl">
             <Input
-              className={`${dynamicwidth} rounded-lg`}
+              className={`${dynamicwidth}`}
               value={jiraInput}
               onChange={(e) => setJiraInput(e.target.value)}
               placeholder="e.g., TESTING"
@@ -553,9 +571,9 @@ if (!finalInput) return;
 
           {(searchTerm.trim().length > 0 || filteredTasks.length > 0) && (
             <ScrollArea>
-              <Card className={`${dynamicHeightJira} w-full p-0 h-[390px]`}>
+              <Card className={`${dynamicHeightJira} w-full p-0 h-[385px]`}>
                 
-                <div className="text-xs font-semibold tracking-wide px-3 text-white flex flex-wrap gap-4 justify-between items-center  mt-3">
+                <div className="text-xs font-semibold tracking-wide px-3 text-white flex flex-wrap gap-4 justify-between items-center mt-3">
                   <span className="text-black dark:text-white">Task List (Jira)</span>
                   <div className="flex flex-wrap items-center gap-2">
                      <div className="relative">
@@ -566,7 +584,7 @@ if (!finalInput) return;
                         Status <ChevronDown size={12} />
                       </button>
                       {showStatusDropdown && (
-                        <div className="absolute z-10 bg-[grey] dark:bg-[#1c1e28] shadow-lg rounded-md p-2 mt-1">
+                        <div className="absolute z-50 bg-[grey] dark:bg-[#1c1e28] shadow-lg rounded-md p-2 mt-1">
                           {['To Do', 'In Progress', 'Done'].map((status) => (
                             <label key={status} className="block text-sm">
                               <input
@@ -589,7 +607,7 @@ if (!finalInput) return;
                         Priority <ChevronDown size={12} />
                       </button>
                       {showPriorityDropdown && (
-                        <div className="absolute z-10 bg-[grey] dark:bg-[#1c1e28] shadow-lg rounded-md p-2 mt-1">
+                        <div className="absolute z-50 bg-[grey] dark:bg-[#1c1e28] shadow-lg rounded-md p-2 mt-1">
                           {['High', 'Medium', 'Low'].map((priority) => (
                             <label key={priority} className="block text-sm">
                               <input
@@ -627,7 +645,7 @@ if (!finalInput) return;
                   </div>
                 )  :
                  (
-                  <div className="overflow-auto">
+                  <div className="overflow-y-auto mt-[-15px]">
                     
                      <GenericTable
                         isSidebarCollapsed={isSidebarCollapsed}

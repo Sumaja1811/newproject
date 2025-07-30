@@ -62,10 +62,19 @@
 "use client";
 import React, { useState } from "react";
 import { Trash, X, History } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export interface ChatItem {
   question: string;
   answer: string | React.ReactElement;
+  response?: {
+    llm_response: string;
+}
 }
 
 export interface ChatSession {
@@ -166,31 +175,32 @@ export default function ChatHistorySidebar({
         </button>
       </footer>
 
-      {deleteSessionId && (
-  <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-    <div className="bg-[#1a1a1a] border border-[#3e3e3e] p-6 rounded-lg shadow-lg w-[300px] text-white">
-      <p className="mb-4 text-sm">Are you sure you want to delete this conversation?</p>
-      <div className="flex justify-end space-x-3">
+     {deleteSessionId && (
+  <Dialog open={!!deleteSessionId} onOpenChange={() => setDeleteSessionId(null)}>
+    <DialogContent className="bg-[#1a1a1a] border border-[#3e3e3e] text-white sm:max-w-[320px] rounded-2xl">
+      <DialogHeader>
+        <p className="text-sm">Are you sure you want to delete this conversation?</p>
+      </DialogHeader>
+      <DialogFooter className="flex justify-end space-x-3">
         <button
           onClick={() => setDeleteSessionId(null)}
-          className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
+          className="px-3 py-1 bg-gray-700 rounded-lg hover:bg-gray-600"
         >
           Cancel
         </button>
-       <button
-  onClick={() => {
-    onDelete(deleteSessionId); // delete the session
-    setDeleteSessionId(null); // close confirmation popup
-    onClose(); // close the sidebar (to show initial state in parent)
-  }}
-  className="px-3 py-1 bg-red-600 rounded hover:bg-red-500"
->
-  Delete
-</button>
-
-      </div>
-    </div>
-  </div>
+        <button
+          onClick={() => {
+            onDelete(deleteSessionId); // delete the session
+            setDeleteSessionId(null); // close confirmation popup
+            onClose(); // close the sidebar (to show initial state)
+          }}
+          className="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-500"
+        >
+          Delete
+        </button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 )}
 
     </aside>

@@ -143,31 +143,36 @@ const pages = [
     }
   }
 
-const dynamicwidth = sidebarCollapsed ? 'w-[95.5vw]' : 'w-[80.1vw]';
+const dynamicwidth = sidebarCollapsed ? 'w-full md:w-[95vw]' : 'w-full md:w-[80vw]';
  
   return (
     <SidebarProvider>
       <AppSidebar setActivePage={setActivePage} activePage={activePage} />
-      <div style={{ height:"95.5vh", marginTop:"14px", borderRadius:"8px"}} className={`${dynamicwidth} transition-all duration-300 ease-in-out bg-white dark:bg-[#0D0D0D] `}>
+      <div className="overflow-x-auto">
+  <div
+    style={{  marginTop: "14px", borderRadius: "8px"}}
+    className={`${dynamicwidth} h-[95.5vh] transition-all duration-300 ease-in-out bg-white dark:bg-[#0D0D0D]`}
+  >
+      <div style={{ marginTop:"14px", borderRadius:"8px"}} className={`${dynamicwidth} transition-all duration-300 ease-in-out bg-white dark:bg-[#0D0D0D] `}>
         {/* <SidebarInset> */}
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-  <div className="flex items-center gap-2 px-4 w-full">
-    <SidebarTrigger className="-ml-1" />
-    <span>
-      <g xmlns="http://www.w3.org/2000/svg" id="Group_116" data-name="Group 116" transform="translate(-354 -38)">
-        <g id="Group_5" data-name="Group 5" transform="translate(336 -189)">
-          <circle id="Ellipse_1" data-name="Ellipse 1" cx="19" cy="19" r="19" transform="translate(18 227)" fill="#383838"/>
-        </g>
-        <g id="menu-hamburger_curved" transform="translate(333 -3.709)">
-          <path id="Path_24" data-name="Path 24" d="M32,67.709H48.378M32,61.854h9.453M32,56H48.378" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </g>
-      </g>
-    </span>
-
-    <div className="flex items-center gap-4 w-full">
-      <p className="text-white">{activePage}</p>
+        <div className="flex items-center gap-2 px-4 w-full">
+           <SidebarTrigger className="ml-1" />
+          <span>
+          <g xmlns="http://www.w3.org/2000/svg" id="Group_116" data-name="Group 116" transform="translate(-354 -38)">
+            <g id="Group_5" data-name="Group 5" transform="translate(336 -189)">
+              <circle id="Ellipse_1" data-name="Ellipse 1" cx="19" cy="19" r="19" transform="translate(18 227)" fill="#383838"/>
+            </g>
+            <g id="menu-hamburger_curved" transform="translate(333 -3.709)">
+              <path id="Path_24" data-name="Path 24" d="M32,67.709H48.378M32,61.854h9.453M32,56H48.378" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </g>
+          </g>
+        </span>
+        <p className="text-white w-[47vh]">{activePage}</p>
+        <div className="flex items-center justify-end gap-4 w-full">
+ 
       {activePage === "CodeSensei" && (
-        <div className="ml-101">
+        <div>
           <HeaderTabs
         activeModule="CodeSensei"
         onHistoryClick={() => setShowHistory((prev) => !prev)}
@@ -196,7 +201,8 @@ const dynamicwidth = sidebarCollapsed ? 'w-[95.5vw]' : 'w-[80.1vw]';
         </div>
       {/* </SidebarInset> */}
       </div>
-      
+     </div> 
+     </div>
     </SidebarProvider>
   )
 }

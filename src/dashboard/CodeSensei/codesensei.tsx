@@ -11,7 +11,9 @@ interface HeaderTabsProps {
    onHistoryClick: () => void;
    onNewChat: () => void;
   onSearchChat: () => void; 
-  onConfigurationClick?: () => void; // Optional callback for configuration click
+  onConfigurationClick?: () => void;
+    isSidebarCollapsed?: boolean;
+ // Optional callback for configuration click
 }
 
 type TabOption = {
@@ -19,8 +21,10 @@ type TabOption = {
   icon: React.ReactNode; // Use ReactNode to allow JSX elements
 };
 
-export default function HeaderTabs({ activeModule, onHistoryClick, onNewChat, onSearchChat, onConfigurationClick }: HeaderTabsProps) {
+export default function HeaderTabs({ isSidebarCollapsed, activeModule, onHistoryClick, onNewChat, onSearchChat, onConfigurationClick }: HeaderTabsProps) {
   const [activeTab, setActiveTab] = useState<TabOption | null>(null);
+
+    const dynamicwidth = isSidebarCollapsed ? 'w-[93.15vw]' : 'w-[77.75vw]';
 
   const tabs: TabOption[] = [
   {
@@ -56,14 +60,14 @@ export default function HeaderTabs({ activeModule, onHistoryClick, onNewChat, on
                 : "bg-[#ccc] dark:bg-[#262626] hover:bg-black hover:text-white dark:hover:bg-[#333]  dark:text-white text-black"
             )}
            onClick={() => {
-  setActiveTab(tab);
-  if (tab.label === "Chat History") onHistoryClick();
-  if (tab.label === "New Chat") onNewChat(); // ✅ Call the reset function
-    if (tab.label === "Search Chat") onSearchChat(); 
-  if (tab.label === "Configuration" && onConfigurationClick) {
-    onConfigurationClick(); // Call the configuration click handler if provided
-  }
-}}
+              setActiveTab(tab);
+              if (tab.label === "Chat History") onHistoryClick();
+              if (tab.label === "New Chat") onNewChat(); // ✅ Call the reset function
+                if (tab.label === "Search Chat") onSearchChat(); 
+              if (tab.label === "Configuration" && onConfigurationClick) {
+                onConfigurationClick(); // Call the configuration click handler if provided
+              }
+            }}
           >
             <span className="flex items-center gap-1">
               {typeof tab.icon === "string" ? (

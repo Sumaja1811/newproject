@@ -40,7 +40,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
- "data-[state=active]:[background-color:#B164FF] data-[state=active]:text-white rounded-xl px-4 py-2 transition-colors" ,
+ "data-[state=active]:[background-color:#B164FF] text-sm text-white rounded-xl px-4 py-2 transition-colors" ,
         className
       )}
       {...props}

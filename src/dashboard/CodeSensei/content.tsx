@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import ChatHistorySidebar, { type ChatItem, type ChatSession} from "@/dashboard/CodeSensei/chatHistorySibebar";
 import SearchChatModal from "./searchChatPopup";
 import ConfigurationSidebar from "./configuratinoSidebar";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ChevronDown, Mic } from "lucide-react";
+
 
 
 interface ContentProps {
@@ -17,9 +20,11 @@ interface ContentProps {
    setShowSearchModal: (value: boolean) => void;
    showConfiguration?: boolean;
    setShowConfiguration: (value: boolean) => void;
+   isSidebarExpanded?: boolean;
+
 }
 
-export default function Content({ showHistory, onCloseHistory, resetSignal, showSearchModal,setShowSearchModal, showConfiguration, setShowConfiguration }: ContentProps) {
+export default function Content({ showHistory, onCloseHistory, resetSignal, showSearchModal,setShowSearchModal, isSidebarExpanded, showConfiguration, setShowConfiguration }: ContentProps) {
   const [inputText, setInputText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   // const [chatHistory, setChatHistory] = useState<
@@ -36,6 +41,72 @@ const [recentSearches, setRecentSearches] = useState<string[]>([]);
 const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
 const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 const currentSession = chatSessions.find(s => s.id === currentSessionId);
+
+const [isRecording, setIsRecording] = useState(false);
+const SpeechRecognition =
+  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+const recognitionRef = useRef<any>(null);
+
+const [prevResponses, setPrevResponses] = useState<any[]>([]);
+
+
+
+useEffect(() => {
+  const SpeechRecognition =
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    console.warn("❌ SpeechRecognition is not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = "en-US";
+
+  recognition.onstart = () => console.log("🎙️ Speech recognition started");
+  recognition.onresult = (event: any) => {
+    const transcript = event.results[0][0].transcript;
+    console.log("🎤 Received speech:", transcript);
+    setInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+  };
+  recognition.onerror = (event: any) => {
+    console.error("❌ Error:", event.error);
+  };
+  recognition.onend = () => {
+    console.log("🛑 Speech recognition ended");
+    setIsRecording(false); // ← update UI when it ends
+  };
+
+  recognitionRef.current = recognition;
+}, []);
+
+const toggleRecording = () => {
+  const recognition = recognitionRef.current;
+  if (!recognition) {
+    alert("Speech Recognition not supported in this browser.");
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop(); // will trigger onend
+  } else {
+    try {
+      recognition.start(); // manual trigger
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Failed to start:", err);
+    }
+  }
+};
+
+
+
+
+
+
 
 const handleSelectSession = (sessionId: string) => {
   const selected = chatSessions.find((s) => s.id === sessionId);
@@ -89,6 +160,10 @@ const saveCurrentSession = () => {
     }
   });
 };
+// Speech recognition setup
+
+
+
 
 
   useEffect(() => {
@@ -125,131 +200,6 @@ const saveCurrentSession = () => {
 }, [resetSignal]);
 
 
-
-//   const handleSend = () => {
-//   if (!inputText.trim()) return;
-
-//   const currentQuestion = inputText.trim();
-//   setInputText("");
-//   setIsGenerating(true);
-
-//   const tempAnswer: ChatItem = {
-//     question: currentQuestion,
-//     answer: <p className="text-black dark:text-white">Generating...</p>,
-//   };
-
-//   let targetSessionId = currentSessionId;
-
-//   // Create a new session if none exists
-//   if (!currentSessionId) {
-//     const newId = crypto.randomUUID();
-//     const newSession: ChatSession = {
-//       id: newId,
-//       messages: [tempAnswer],
-//       createdAt: new Date().toISOString(),
-//     };
-//     setChatSessions(prev => [newSession, ...prev]);
-//     setCurrentSessionId(newId);
-//     targetSessionId = newId; // use this for later updates
-//     setChatHistory([tempAnswer]);
-//   } else {
-//     // Append to existing session
-//     setChatSessions(prev =>
-//       prev.map(session =>
-//         session.id === currentSessionId
-//           ? { ...session, messages: [...session.messages, tempAnswer] }
-//           : session
-//       )
-//     );
-//     setChatHistory(prev => [...prev, tempAnswer]);
-//   }
-
-//   // Simulate async response
-//   setTimeout(() => {
-//     const generatedAnswer = getAnswerForQuestion(currentQuestion);
-
-//     // 🔥 Use `targetSessionId` to ensure correct session is updated
-//     setChatSessions(prev =>
-//       prev.map(session => {
-//         if (session.id === targetSessionId) {
-//           const updatedMessages = [...session.messages];
-//           updatedMessages[updatedMessages.length - 1] = {
-//             ...updatedMessages[updatedMessages.length - 1],
-//             answer: generatedAnswer,
-//           };
-//           return { ...session, messages: updatedMessages };
-//         }
-//         return session;
-//       })
-//     );
-
-//     setChatHistory(prev => {
-//       const updated = [...prev];
-//       updated[updated.length - 1] = {
-//         ...updated[updated.length - 1],
-//         answer: generatedAnswer,
-//       };
-//       return updated;
-//     });
-
-//     setIsGenerating(false);
-//   }, 2000);
-// };
-
-
-
-//  const getAnswerForQuestion = (question: string): JSX.Element => {
-//   if (
-//     question ===
-//     "What are all the data structures used in the programs and indicate data structures wise usage?"
-//   ) {
-//     return (
-//       <ul className="space-y-3">
-//   <li className="text-black dark:text-white">
-//     1. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">BILL-NEW-DATA</span>: This record structure contains input data for each bill. It includes patient information (NPI, provider number, patient status), diagnosis and procedure codes (tables), length of stay, covered days, charges, and other relevant billing details. It’s used as input to the payment calculation routines.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     2. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">PPS-DATA-ALL</span>: This is a large record containing various parameters and calculated values used in the payment calculation process. It includes data elements such as MSA (Medicare Severity Adjustment), wage index, average length of stay, relative weight, payment amounts (site neutral, standard, outlier), and other crucial factors. It acts as a central repository for intermediate and final results.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     3. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">PPS-PAYMENT-DATA</span>: This record structure specifically holds the calculated payment amounts. It separates the different types of payments (site-neutral cost, site-neutral IPPS, standard full, standard SSO).
-//   </li>
-//   <li className="text-black dark:text-white">
-//     4. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">PPS-OTHER-DATA</span>: This record holds various percentages and rates used in the calculations, such as national labor and non-labor percentages, standard federal rate, budget neutral rate, and IPPS threshold.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     5. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">PPS-PC-DATA</span>: This record structure likely contains data related to procedure codes and other relevant procedure-specific information. The exact contents are unclear from the snippet.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     6. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">CBSA-WI-TABLE</span>: This is a table (array) containing data indexed by CBSA (Core Based Statistical Area code). Each entry includes an effective date and wage indices (multiple years). This table is used to look up wage indices based on the CBSA of the patient’s location.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     7. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">IPPS-CBSA-WI-TABLE</span>: Similar to CBSA-WI-TABLE, but this table likely contains wage index data specifically for IPPS (Inpatient Prospective Payment System) calculations.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     8. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">MSA-WI-TABLE</span>: This table contains data indexed by MSA (Metropolitan Statistical Area) code, providing wage indices for different years. Used for MSA-based wage index lookups.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     9. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">PROV-RECORD</span>: This structure seems to hold provider-specific information read from a provider file. It’s divided into three parts (PROV-REC1, PROV-REC2, PROV-REC3) likely for better organization or handling of large amounts of data.
-//   </li>
-//   <li className="text-black dark:text-white">
-//     10. <span className="text-[#6DD8FF] bg-[#2F2F2F] rounded-lg px-2">B-DIAGNOSIS-CODE-TABLE and B-PROCEDURE-CODE-TABLE</span>: These are tables containing lists of diagnosis and procedure codes, respectively. They are used to store and access the codes associated with each patient’s bill.
-//   </li>
-// </ul>
-
-//     );
-//   }
-//   if (question.toLowerCase().includes("pps-data-all")) {
-//     return (
-//       <p>
-//         <strong className="text-[#38DEEB]">PPS-DATA-ALL</strong> stores various intermediate values during the payment calculation like wage index, LOS, site-neutral and standard payment components. It acts like a centralized memory for all PPS-related computations.
-//       </p>
-//     );
-//   }
-
-//   return <p className="text-black dark:text-white">Sorry, I don’t have an answer for that yet.</p>;
-// };
-
 const handleSend = async () => {
   if (!inputText.trim()) return;
 
@@ -259,7 +209,10 @@ const handleSend = async () => {
 
   const tempAnswer: ChatItem = {
     question: currentQuestion,
-    answer: <p className="text-black dark:text-white">Generating...</p>,
+    answer: <div className="flex items-center gap-2 text-black dark:text-white">
+      <img src="/bot_icon.svg" alt="Loading" className="w-6 h-6" />
+      <span>Generating...</span>
+    </div>,
   };
 
   let targetSessionId = currentSessionId;
@@ -316,34 +269,94 @@ const handleSend = async () => {
   setIsGenerating(false);
 };
 
-
+// useEffect(() => {
+//   console.log("isLanguageSelected changed:", isLanguageSelected);
+//   console.log("type of isLanguageSelected:", typeof isLanguageSelected);
+// })
 const getAnswerForQuestion = async (question: string): Promise<JSX.Element> => {
   try {
+    const selectedLang = localStorage.getItem("selectedLanguage") ;
+
     const res = await axios.post("http://10.73.80.148:8081/api/getLLMInference", {
-      langtype: "java",
+      langtype: selectedLang,
       query: question,
-      prev_response: [{}]
+      prev_response: prevResponses,
     });
 
     const result = res?.data?.response;
-
+    setPrevResponses((prev) => [...prev, result]);
     const displayText =
       typeof result === "string"
         ? result
         : result?.[Object.keys(result)[0]] || "No response found.";
 
-    return (
-      <p className="text-black dark:text-white whitespace-pre-wrap">
-        {displayText}
-      </p>
+    
+    let processedText = displayText.replace(
+      /\*\*(.+?):\*\*/g,
+      `<span class="inline-block text-[blue] bg-[#ececec] dark:text-[#6DD8FF] dark:bg-[#2F2F2F] px-1 py-0.5 rounded font-semibold">$1:</span>`
     );
-  } catch (error) {
-    console.error("API error:", error);
-    return (
-      <p className="text-red-400">Failed to fetch response from the server.</p>
+
+    // Then: Replace `PARAGRAPH-NAME` with blue highlight
+    processedText = processedText.replace(
+      /`([@a-zA-Z0-9_.-]+)`/g,
+      `<span class="inline-block text-[blue] dark:text-[#6DD8FF] px-1 py-0.5 rounded font-mono">$1</span>`
     );
-  }
-};
+
+     const codeSnippets = result?.code_snippets || [];
+
+    return (
+       <div className="space-y-4 text-black dark:text-white">
+         {/* LLM Response */}
+
+         <div
+          className="whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: processedText }}
+        />
+
+        {/* Accordion */}
+        {codeSnippets.length > 0 && (
+          <Accordion type="single" collapsible className="dark:bg-[#181818] bg-[#ccc] rounded-xl border dark:border-[#2E2E2E] border-[#f4f4f4]">
+            <AccordionItem value="code-snippets">
+              <AccordionTrigger
+                className="flex items-center justify-between text-left text-[13px] font-semibold mt-[-10px] before:hidden"
+              >
+                <div className="flex items-center gap-2 text-[13px] pl-3 mt-1">
+                  Code Snippet
+                  <span className="text-md text-white bg-[#292828] px-2 rounded-xl text-[10px]">
+                    {selectedLang}
+                  </span>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180 ml-85" />
+              </AccordionTrigger>
+
+              <AccordionContent>
+                <div className="space-y-4">
+                  {codeSnippets.map((snippet: string, idx: number) => (
+                    <pre
+                      key={idx}
+                      className="bg-gray-100 dark:bg-gray-900 text-sm text-black dark:text-white p-3 rounded overflow-x-auto h-35 overflow-y-auto"
+                    >
+                      <code>{snippet}</code>
+                    </pre>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+       
+      </div>
+    );
+    } catch (error) {
+      console.error("API error:", error);
+      return (
+        <p className="text-red-400 text-[13px]">
+          Failed to fetch response from the server.
+        </p>
+      );
+    }
+  };
+
 
   const isChatStarted = chatHistory.length > 0 || isGenerating;
 
@@ -355,9 +368,9 @@ const getAnswerForQuestion = async (question: string): Promise<JSX.Element> => {
     >
       {/* Chat History */}
       {isChatStarted && (
-        <div className="flex flex-col items-center overflow-y-auto px-6 pt-6 space-y-2 w-full h-[67vh]">
+        <div className="flex flex-col items-center overflow-y-auto px-6 pt-6 space-y-2 w-full h-[67vh]  ">
           {chatHistory.map((chat, index) => (
-            <div key={index} className="space-y-2 w-[44vw]">
+            <div key={index} className={`${isSidebarExpanded ? "w-[10vw]" : "w-[44vw]"} space-y-2`}>
               <div className="flex justify-end">
                 <div className="dark:bg-[#525252] bg-[#f4f4f4] px-3 py-2 rounded-[10px] text-sm text-black dark:text-white max-w-xl">
                   {chat.question}
@@ -367,10 +380,10 @@ const getAnswerForQuestion = async (question: string): Promise<JSX.Element> => {
               <div className="flex justify-start">
                 <div className="px-3 py-2 rounded-lg text-[12px] tracking-wider text-gray-300 whitespace-pre-wrap">
                   {typeof chat.answer === "string" ? (
-  <pre>{chat.answer}</pre>
-) : (
-  chat.answer
-)}
+                      <pre>{chat.answer}</pre>
+                    ) : (
+                      chat.answer
+                    )}
                 </div>
               </div>
             </div>
@@ -413,7 +426,7 @@ const getAnswerForQuestion = async (question: string): Promise<JSX.Element> => {
 )}
 
 {showConfiguration && (
-  <ConfigurationSidebar onClose={() => setShowConfiguration(false)}/>)}
+  <ConfigurationSidebar onClose={() => setShowConfiguration(false)} />)}
        
       {/* Input Box */}
       <div
@@ -431,9 +444,18 @@ const getAnswerForQuestion = async (question: string): Promise<JSX.Element> => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="w-full h-[12vh] dark:!bg-[#2E2D2D] !bg-[#ececec] rounded-xl border-none outline-none focus:outline-none focus:ring-0 pr-12 dark:text-white text-black placeholder:text-gray-400"
+            className=" h-[12vh] dark:!bg-[#2E2D2D] !bg-[#ececec] rounded-xl border-none outline-none focus:outline-none focus:ring-0 pr-25 dark:text-white text-black placeholder:text-gray-400"
             placeholder="Ask anything..."
           />
+           <button
+            onClick={toggleRecording}
+            className={`absolute right-14 top-1/2 transform -translate-y-1/2 
+              h-8 w-8 flex items-center justify-center rounded-full 
+              ${isRecording ? 'bg-[#b164ff] animate-pulse' : 'bg-[#1f1e1e]'} 
+              transition-colors duration-300`}
+          >
+            <Mic className="w-5 h-4 text-white" />
+          </button>
           <button
             onClick={handleSend}
             className="absolute right-4 top-1/2 -translate-y-1/2"

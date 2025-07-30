@@ -1,47 +1,3 @@
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogClose,
-// } from "@/components/ui/dialog";
-// import { Input } from "@/components/ui/input";
-// import { Search, X } from "lucide-react";
-
-// interface SearchChatModalProps {
-//   open: boolean;
-//   onClose: () => void;
-//   onSearch?: (text: string) => void; // Optional callback for search action
-// }
-
-// export default function SearchChatModal({ open, onClose }: SearchChatModalProps) {
-//   return (
-//     <Dialog open={open} onOpenChange={onClose}>
-//       <DialogContent
-//         className="border border-none bg-white dark:bg-[#161A26] text-black dark:text-white p-0 h-70 gap-0 [&>button:last-child]:hidden"
-//       >
-//         {/* Custom Close Button */}
-//         <DialogClose asChild>
-//           <button
-//             className="absolute right-3 top-2.5 text-gray-400 hover:text-black dark:hover:text-white"
-//             aria-label="Close"
-//           >
-//             <X className="w-5 h-5" />
-//           </button>
-//         </DialogClose>
-
-//         <div>
-//           <div className="flex items-center border-b border-gray-200 dark:border-gray-700 px-2 py-2.5">
-//               <Search className="w-4 h-4" />
-//               <span className="px-2 text-sm tracking-wider">Search Chat</span>
-//         </div>
-//                       <Input placeholder="Search here.." className="mt-4 ml-3 mr-3 w-[35.7vw] outline-none border border-none !bg-[#323a50]" />
-
-//         </div>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
-
-
 "use client";
 import { useEffect } from "react";
 import {
@@ -100,9 +56,6 @@ export default function SearchChatModal({
     const [inputText, setInputText] = useState("");
   const [searchText, setSearchText] = useState("");
 
-//   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//   setSearchText(e.target.value);
-// };
 
 useEffect(() => {
   const saved = localStorage.getItem("recentSearches");
@@ -115,22 +68,6 @@ useEffect(() => {
 useEffect(() => {
   localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
 }, [recentSearches]);
-
-
-// Called when user presses Enter
-// const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//   if (e.key === "Enter") {
-//     const trimmed = searchText.trim().toLowerCase();
-//     if (trimmed && !recentSearches.includes(trimmed)) {
-//       setRecentSearches((prev) => {
-//         const updated = [trimmed, ...prev.filter((item) => item !== trimmed)];
-//         return updated.slice(0, 5); // Keep latest 5
-//       });
-//     }
-//   }
-// };
-
-
 
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
@@ -150,7 +87,7 @@ const handleSubmitSearch = () => {
     // Always move the term to top (whether it's new or existing)
     setRecentSearches((prev) => {
       const updated = [trimmed, ...prev.filter((item) => item !== trimmed)];
-      return updated.slice(0, 3); // Limit to latest 5
+      return updated.slice(0, 3);
     });
   }
 };
@@ -165,12 +102,30 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
 
 
- const filteredChats = useMemo(() => {
+//  const filteredChats = useMemo(() => {
+//   const keyword = searchText.trim().toLowerCase();
+//   if (!keyword) return [];
+
+//   return chatHistory.filter((chat) => {
+//     const questionMatch = chat.question.toLowerCase().includes(keyword);
+
+//     const answerText =
+//       typeof chat.answer === "string"
+//         ? chat.answer
+//         : extractTextFromJSX(chat.answer);
+
+//     const answerMatch = answerText.toLowerCase().includes(keyword);
+
+//     return questionMatch || answerMatch;
+//   });
+// }, [searchText, chatHistory]);
+
+const filteredChats = useMemo(() => {
   const keyword = searchText.trim().toLowerCase();
   if (!keyword) return [];
 
   return chatHistory.filter((chat) => {
-    const questionMatch = chat.question.toLowerCase().includes(keyword);
+    const questionMatch = chat.question?.toLowerCase().includes(keyword) ?? false;
 
     const answerText =
       typeof chat.answer === "string"
@@ -179,10 +134,12 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
     const answerMatch = answerText.toLowerCase().includes(keyword);
 
-    return questionMatch || answerMatch;
+    const llmResponseText = chat.response?.llm_response ?? "";
+    const llmResponseMatch = llmResponseText.toLowerCase().includes(keyword);
+
+    return questionMatch || answerMatch || llmResponseMatch;
   });
 }, [searchText, chatHistory]);
-
 
 
   return (
@@ -235,7 +192,7 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
               </p>
               <p className="text-sm mt-1 dark:text-white text-black ">
                 {typeof chat.answer === "string"
-                  ? <div>{highlightText(chat.answer, searchText)}</div>
+                  ? <div> {highlightText(chat.response?.llm_response ?? "", searchText)}</div>
                   : highlightText(extractTextFromJSX(chat.answer), searchText)}
               </p>
             </div>
@@ -276,28 +233,9 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 )}
 
 
-
-     {/* {!searchText.trim() && recentSearches.length > 0 && (
-  <div className="px-4 pb-2 pt-1 text-sm">
-    <p className="text-xs text-muted-foreground mb-1">Recent Searches:</p>
-    <ul className="space-y-1">
-      {recentSearches.map((term, index) => (
-        <li key={index}>
-          <button
-            className="text-blue-400 hover:underline text-sm"
-            onClick={() => setSearchText(term)}
-          >
-            {term}
-          </button>
-        </li>
-      ))}
-    </ul>
   </div>
-)} */}
+  </DialogContent>
 
-  </div>
-</DialogContent>
-
-    </Dialog>
+</Dialog>
   );
 }

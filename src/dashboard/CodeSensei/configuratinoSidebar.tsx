@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Settings, X } from "lucide-react";
 
-const ConfigurationSidebar: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export default function ConfigurationSidebar({ onClose }: { onClose: () => void }) {
+  const [isLanguageSelected, setIsLanguageSelected] = useState<string>("cobol");
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem("selectedLanguage");
+    if (savedLang) {
+      setIsLanguageSelected(savedLang);
+    }
+  }, []);
+
+  const handleSaveOptions = () => {
+    localStorage.setItem("selectedLanguage", isLanguageSelected);
+    onClose();
+  };
   return (
      <aside className="fixed top-0 right-0 z-50 h-[100vh] w-70 dark:bg-[#0D0D0D] bg-[#ececec] border dark:border-[#3e3e3e] border-[#CED4DA] flex flex-col rounded-[10px]">
       <header className="flex items-center py-3 border-b border-[#3e3e3e]">
@@ -44,7 +58,7 @@ const ConfigurationSidebar: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         {/* Language Selector */}
         <div className="flex flex-col gap-1">
           <label className="dark:text-gray-300 text-black">Selected Language</label>
-          <select className="py-2 rounded-md dark:bg-[#1e1e1e] bg-[white] text-black dark:text-white border dark:border-gray-600">
+          <select value={isLanguageSelected} onChange={(e) => setIsLanguageSelected(e.target.value)} className="py-2 rounded-md dark:bg-[#1e1e1e] bg-[white] text-black dark:text-white border dark:border-gray-600">
             <option>COBOL</option>
             <option>Java</option>
             <option>Python</option>
@@ -76,7 +90,7 @@ const ConfigurationSidebar: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 <div className="mt-27">
       <footer className="flex justify-center items-center w-full">
         <button
-          onClick={onClose}
+          onClick={handleSaveOptions}
           className="w-full text-sm h-8 ml-2 mr-2 dark:bg-[#1a1a1a] bg-[white] dark:text-[white] text-[black] rounded-lg dark:hover:bg-[#333] border border-[gray] dark:border-[#3e3e3e]"
         >
           Save
@@ -95,4 +109,3 @@ const ConfigurationSidebar: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   );
 };
 
-export default ConfigurationSidebar;
